@@ -12,6 +12,8 @@ const PORT = 5000
 
 var authUrl = ""
 
+var mongo_link = "mongodb+srv://hallothon:hallothon@cluster0.hddpmm6.mongodb.net/?retryWrites=true&w=majority"
+
 // Load client secrets from a local file.
 // fs.readFile('credentials.json', (err, content) => {
 //     if (err) return console.log('Error loading client secret file:', err);
@@ -74,15 +76,15 @@ function getAccessToken(oAuth2Client, callback) {
  * Lists the names and IDs of up to 10 files.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listFiles(auth) {
-    const drive = google.drive({ version: 'v3', auth });
-    getList(drive, '');
-}
-function getList(drive, pageToken) {
+
+
+function getList(auth) {
+    const drive = google.drive({version: 'v3', auth});
+    pageToken = '';
     drive.files.list({
         corpora: 'user',
         pageSize: 10,
-        q: "fullText contains 'regression'",
+        q: "fullText contains 'suresh'",
         pageToken: pageToken ? pageToken : '',
         fields: 'nextPageToken, files(*)',
     }, (err, res) => {
@@ -102,7 +104,7 @@ function getList(drive, pageToken) {
 function processList(files) {
     console.log('Processing....');
     files.forEach(file =>  {
-        MongoClient.connect('mongodb://127.0.0.1:27017/', async (err,client)=>{
+        MongoClient.connect(mongo_link, async (err,client)=>{
             if(err) throw err 
             var col = client.db('Hallothon').collection('hr_files')
             
@@ -124,7 +126,7 @@ app.use(express.urlencoded());
 app.post('/login', (req, res) => {
     fs.readFile('credentials.json', (err, content) => {
         if (err) return console.log('Error loading client secret file:', err);
-        authorize(JSON.parse(content), listFiles);
+        authorize(JSON.parse(content), getList);
     })
     res.send({url: authUrl})
     
