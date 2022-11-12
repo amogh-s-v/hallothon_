@@ -80,7 +80,7 @@ function getAccessToken(oAuth2Client, callback) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 
-function getList(auth, qword) {
+function getList(auth, qword, cat_name, sub_name) {
   const drive = google.drive({ version: "v3", auth });
   pageToken = "";
   drive.files.list(
@@ -96,7 +96,7 @@ function getList(auth, qword) {
       const files = res.data.files;
       if (files.length) {
         console.log("Files:");
-        processList(files);
+        processList(files, cat_name, sub_name);
         if (res.data.nextPageToken) {
           getList(drive, res.data.nextPageToken);
         }
@@ -106,7 +106,7 @@ function getList(auth, qword) {
     }
   );
 }
-function processList(files) {
+function processList(files, cat_name, sub_name) {
   console.log("Processing....");
   files.forEach((file) => {
     MongoClient.connect(mongo_link, async (err, client) => {
@@ -123,6 +123,8 @@ function processList(files) {
             file_type: file.fullFileExtension,
             created_time: file.createdTime,
             modified_time: file.modifiedTime,
+            cat_name: cat_name,
+            sub_name: sub_name,
           })
           .then(() => {
             client.close();
@@ -140,13 +142,12 @@ function getWords(auth) {
     var word_list = col.find({}).toArray((err, res) => {
       if(err) return err;
       res.forEach((ele) => {
-        var res_q = ele.resume[0]
-        for(let i = 1; i < ele.resume.length; i++){
-          res_q += " and " + ele.resume[i]
+        var res_q = ele.words[0]
+        for(let i = 1; i < ele.words.length; i++){
+          res_q += " and " + ele.words[i]
         }
-        // console.log(res_q)
 
-        getList(auth, res_q)
+        getList(auth, res_q, ele.cat_name, ele.sub_name)
       })
     })
   });
