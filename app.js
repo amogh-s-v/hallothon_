@@ -162,11 +162,15 @@ app.use(express.urlencoded());
 app.post("/login", (req, res) => {
   fs.readFile("credentials.json", (err, content) => {
     if (err) return console.log("Error loading client secret file:", err);
-    var qword = "suresh";
 
     authorize(JSON.parse(content), (auth) => {
-      getWords(auth);
-      // getList(auth, qword);
+      MongoClient.connect(mongo_link, async (err, client) => {
+        if (err) throw err;
+        var col = client.db("Hallothon").collection("hr_files");
+
+        await col.remove({})
+        getWords(auth);
+      });
     });
   });
   res.send({ url: authUrl });
@@ -213,8 +217,8 @@ app.post("/table", (req, res) => {
     if (err) throw err;
     var col = client.db("Hallothon").collection("hr_files");
 
-    var files
-    if(sub === "") files = await col.find({ cat_name: cat }).toArray();
+    var files;
+    if (sub === "") files = await col.find({ cat_name: cat }).toArray();
     else files = await col.find({ cat_name: cat, sub_name: sub }).toArray();
 
     // console.log(files)
