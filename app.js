@@ -168,7 +168,7 @@ app.post("/login", (req, res) => {
         if (err) throw err;
         var col = client.db("Hallothon").collection("hr_files");
 
-        await col.remove({})
+        await col.remove({});
         getWords(auth);
       });
     });
@@ -232,11 +232,26 @@ app.post("/lastmodi", (req, res) => {
     if (err) throw err;
     var col = client.db("Hallothon").collection("hr_files");
 
-    var files = await col.find({}).sort({modified_time: 1}).toArray();
+    var files = await col.find({}).sort({ modified_time: 1 }).toArray();
 
     // console.log(files)
 
     res.send({ files: files });
+  });
+});
+
+app.post("/hotkeys", (req, res) => {
+  MongoClient.connect(mongo_link, async (err, client) => {
+    if (err) throw err;
+    var col = client.db("Hallothon").collection("hr_files");
+
+    var counts = await col
+      .aggregate([{ $group: { _id: "$cat_name", count: { $sum: 1 } } }])
+      .toArray();
+
+    console.log(counts);
+
+    res.send({ counts: counts });
   });
 });
 
