@@ -132,6 +132,26 @@ function processList(files) {
   });
 }
 
+function getWords(auth) {
+  MongoClient.connect(mongo_link, async (err, client) => {
+    if (err) throw err;
+    var col = client.db("Hallothon").collection("cat_words");
+
+    var word_list = col.find({}).toArray((err, res) => {
+      if(err) return err;
+      res.forEach((ele) => {
+        var res_q = ele.resume[0]
+        for(let i = 1; i < ele.resume.length; i++){
+          res_q += " and " + ele.resume[i]
+        }
+        // console.log(res_q)
+
+        getList(auth, res_q)
+      })
+    })
+  });
+}
+
 var app = express();
 app.use(express.json());
 app.use(express.urlencoded());
@@ -139,9 +159,11 @@ app.use(express.urlencoded());
 app.post("/login", (req, res) => {
   fs.readFile("credentials.json", (err, content) => {
     if (err) return console.log("Error loading client secret file:", err);
-    var qword = 'suresh'
+    var qword = "suresh";
+
     authorize(JSON.parse(content), (auth) => {
-      getList(auth, qword);
+      getWords(auth);
+      // getList(auth, qword);
     });
   });
   res.send({ url: authUrl });
