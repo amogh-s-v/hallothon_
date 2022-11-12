@@ -2,6 +2,8 @@ const fs = require("fs");
 var express = require("express");
 var url = require("url");
 var app = express();
+var cors = require("cors");
+app.use(cors());
 const readline = require("readline");
 const { google } = require("googleapis");
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
@@ -177,31 +179,48 @@ app.post("/categories", (req, res) => {
 
     var word_list = await col.find({}).toArray();
 
-    var cats = []
+    var cats = [];
     word_list.forEach((ele) => {
-      cats.push(ele.cat_name)
-    })
+      cats.push(ele.cat_name);
+    });
 
-    res.send({cats: [... new Set(cats)]})
+    res.send({ cats: [...new Set(cats)] });
   });
 });
 
 app.post("/subs", (req, res) => {
-  const {cat} = req.body
+  const { cat } = req.body;
   // console.log(cat)
   MongoClient.connect(mongo_link, async (err, client) => {
     if (err) throw err;
     var col = client.db("Hallothon").collection("cat_words");
 
-    var word_list = await col.find({cat_name: cat}).toArray();
+    var word_list = await col.find({ cat_name: cat }).toArray();
 
-    var subs = []
+    var subs = [];
     word_list.forEach((ele) => {
-      subs.push(ele.sub_name)
-    })
+      subs.push(ele.sub_name);
+    });
 
-    res.send({subs: subs})
+    res.send({ subs: subs });
   });
-})
+});
+
+app.post("/table", (req, res) => {
+  const { cat, sub } = req.body;
+
+  MongoClient.connect(mongo_link, async (err, client) => {
+    if (err) throw err;
+    var col = client.db("Hallothon").collection("hr_files");
+
+    var files
+    if(sub === "") files = await col.find({ cat_name: cat }).toArray();
+    else files = await col.find({ cat_name: cat, sub_name: sub }).toArray();
+
+    // console.log(files)
+
+    res.send({ files: files });
+  });
+});
 
 app.listen(PORT);
