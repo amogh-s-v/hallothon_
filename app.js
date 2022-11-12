@@ -140,16 +140,16 @@ function getWords(auth) {
     var col = client.db("Hallothon").collection("cat_words");
 
     var word_list = col.find({}).toArray((err, res) => {
-      if(err) return err;
+      if (err) return err;
       res.forEach((ele) => {
-        var res_q = ele.words[0]
-        for(let i = 1; i < ele.words.length; i++){
-          res_q += " and " + ele.words[i]
+        var res_q = ele.words[0];
+        for (let i = 1; i < ele.words.length; i++) {
+          res_q += " and " + ele.words[i];
         }
 
-        getList(auth, res_q, ele.cat_name, ele.sub_name)
-      })
-    })
+        getList(auth, res_q, ele.cat_name, ele.sub_name);
+      });
+    });
   });
 }
 
@@ -168,6 +168,28 @@ app.post("/login", (req, res) => {
     });
   });
   res.send({ url: authUrl });
+});
+
+app.post("/categories", (req, res) => {
+  MongoClient.connect(mongo_link, async (err, client) => {
+    if (err) throw err;
+    var col = client.db("Hallothon").collection("cat_words");
+
+    var word_list = await col.find({}).toArray();
+
+    // res.send({
+    //   cats: word_list.forEach((ele) => {
+    //     return ele.cat_name;
+    //   }),
+    // });
+
+    var cats = []
+    word_list.forEach((ele) => {
+      cats.push(ele.cat_name)
+    })
+
+    res.send({cats: [... new Set(cats)]})
+  });
 });
 
 app.listen(PORT);
