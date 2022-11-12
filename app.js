@@ -227,4 +227,17 @@ app.post("/table", (req, res) => {
   });
 });
 
+app.post("/lastmodi", (req, res) => {
+  MongoClient.connect(mongo_link, async (err, client) => {
+    if (err) throw err;
+    var col = client.db("Hallothon").collection("hr_files");
+
+    var files = await col.find({}).sort({modified_time: 1}).toArray();
+
+    // console.log(files)
+
+    res.send({ files: files });
+  });
+});
+
 app.listen(PORT);
