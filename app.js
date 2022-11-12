@@ -170,6 +170,7 @@ app.post("/login", (req, res) => {
 
         await col.remove({});
         getWords(auth);
+        client.close();
       });
     });
   });
@@ -189,6 +190,7 @@ app.post("/categories", (req, res) => {
     });
 
     res.send({ cats: [...new Set(cats)] });
+    client.close();
   });
 });
 
@@ -206,7 +208,8 @@ app.post("/subs", (req, res) => {
       subs.push(ele.sub_name);
     });
 
-    res.send({ subs: subs });
+    res.send({ subs: subs });p
+    client.close();
   });
 });
 
@@ -224,6 +227,7 @@ app.post("/table", (req, res) => {
     // console.log(files)
 
     res.send({ files: files });
+    client.close();
   });
 });
 
@@ -237,6 +241,7 @@ app.post("/lastmodi", (req, res) => {
     // console.log(files)
 
     res.send({ files: files });
+    client.close();
   });
 });
 
@@ -252,6 +257,7 @@ app.post("/hotkeys", (req, res) => {
     console.log(counts);
 
     res.send({ counts: counts });
+    client.close();
   });
 });
 
