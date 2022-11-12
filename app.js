@@ -177,12 +177,6 @@ app.post("/categories", (req, res) => {
 
     var word_list = await col.find({}).toArray();
 
-    // res.send({
-    //   cats: word_list.forEach((ele) => {
-    //     return ele.cat_name;
-    //   }),
-    // });
-
     var cats = []
     word_list.forEach((ele) => {
       cats.push(ele.cat_name)
@@ -191,5 +185,23 @@ app.post("/categories", (req, res) => {
     res.send({cats: [... new Set(cats)]})
   });
 });
+
+app.post("/subs", (req, res) => {
+  const {cat} = req.body
+  // console.log(cat)
+  MongoClient.connect(mongo_link, async (err, client) => {
+    if (err) throw err;
+    var col = client.db("Hallothon").collection("cat_words");
+
+    var word_list = await col.find({cat_name: cat}).toArray();
+
+    var subs = []
+    word_list.forEach((ele) => {
+      subs.push(ele.sub_name)
+    })
+
+    res.send({subs: subs})
+  });
+})
 
 app.listen(PORT);
